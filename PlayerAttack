@@ -1,0 +1,51 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerAttack : MonoBehaviour
+{
+    [SerializeField] private float AttackCooldown;
+    [SerializeField] private Transform FirePoint;
+    [SerializeField] private GameObject[] bullets;
+    private Animator anime;
+    private MainMove mainmove;
+    private float CooldownTimer = Mathf.Infinity;
+
+    private void Start()
+    {
+        anime = GetComponent<Animator>();
+        mainmove = GetComponent<MainMove>();
+    }
+
+    private void Update()
+    {
+        //Basic ATK
+        if (Input.GetMouseButtonDown(0) && CooldownTimer > AttackCooldown && mainmove.canAttack())
+        {
+            Attacking1();
+        }      
+
+        CooldownTimer += Time.deltaTime;
+    }
+
+    private void Attacking1()
+    {
+        anime.SetTrigger("Attack");
+        CooldownTimer = 0;
+
+        bullets[FindBullets()].transform.position = FirePoint.position;
+        bullets[FindBullets()].GetComponent<Projectile>().SetDirection(Mathf.Sign(transform.localScale.x));
+    }
+
+
+    private int FindBullets()
+    {
+        for (int i = 0; i < bullets.Length; i++)
+        {
+            if (!bullets[i].activeInHierarchy)
+                return i;
+        }
+        return 0;
+    }
+    
+}
