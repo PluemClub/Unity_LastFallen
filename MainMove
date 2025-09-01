@@ -1,0 +1,65 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MainMove : MonoBehaviour
+{
+    [SerializeField] private float speed;
+    [SerializeField] private LayerMask groundLayer;
+    private Rigidbody2D body;
+    private Animator animate;
+    private BoxCollider2D boxCollider;
+    private float horizontalInput;
+
+    void Awake()
+    {
+        //Reference for Rigidbody and Animator from objects only
+        body = GetComponent<Rigidbody2D>();
+        animate = GetComponent<Animator>();
+        boxCollider = GetComponent<BoxCollider2D>();
+    }
+
+    private void Update()
+    {
+        horizontalInput = Input.GetAxis("Horizontal");
+        body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
+
+        //Character Flip Code
+        if(horizontalInput > 0.01f)
+        {
+            transform.localScale = Vector3.one;
+        }
+        else if(horizontalInput < - 0.01f)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+
+
+        if (Input.GetKey(KeyCode.Space) && IsGrounded())
+        {
+            Jumping();
+        }
+
+        //Animator Parameter
+        animate.SetBool("Run", horizontalInput != 0);
+        animate.SetBool("Grounded", IsGrounded());
+    }
+
+    private void Jumping()
+    {
+        body.velocity = new Vector2(body.velocity.x, speed);
+        animate.SetTrigger("Jump");
+    }
+
+    private bool IsGrounded()
+    {
+        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
+        return raycastHit.collider != null;
+    }
+    
+    //ATK
+    public bool canAttack()
+    {
+        return horizontalInput == 0 && IsGrounded();
+    }
+}
